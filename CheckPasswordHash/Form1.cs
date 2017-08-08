@@ -6,6 +6,7 @@ using System.Data;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
@@ -17,12 +18,13 @@ namespace CheckPasswordHash
     {
         List<string> hashesFromFile1 = new List<string>();
         List<string> hashesFromFile2 = new List<string>();
+        Dictionary<string,string> hashesToSearch = new Dictionary<string, string>();
         StreamReader sr;
         SHA1 hashFunction = new SHA1Managed();
         string passwd;
         byte[] passwordArray;
         byte[] hashArray;
-        string hashToSearch;
+        //string hashToSearch;
         string filePath;
         bool threadSwitch = false;
         bool doneReading = false;
@@ -53,6 +55,7 @@ namespace CheckPasswordHash
                         {
                             string s = sr.ReadLine();
                             hashesFromFile1.Add(s);
+                            lineRead++;
                         }
                     }
                 }
@@ -70,6 +73,7 @@ namespace CheckPasswordHash
                         {
                             string s = sr.ReadLine();
                             hashesFromFile2.Add(s);
+                            lineRead++;
                         }
                     }
                 }
@@ -80,16 +84,24 @@ namespace CheckPasswordHash
         {
             if (!threadSwitch)
             {
-                if (hashesFromFile1.Contains(hashToSearch))
+                for (int i = 0; i < hashesToSearch.Keys.Count; i++)
                 {
-                    stringFound = true;
+                    if (hashesFromFile1.Contains(hashesToSearch.Keys.ElementAt(i)))
+                    {
+                        hashesToSearch[hashesToSearch.Keys.ElementAt(i)] = hashesToSearch[hashesToSearch.Keys.ElementAt(i)] + " - Found";
+                        //stringFound = true;
+                    }
                 }
             }
             else
             {
-                if (hashesFromFile2.Contains(hashToSearch))
+                for (int i = 0; i < hashesToSearch.Keys.Count; i++)
                 {
-                    stringFound = true;
+                    if (hashesFromFile2.Contains(hashesToSearch.Keys.ElementAt(i)))
+                    {
+                        hashesToSearch[hashesToSearch.Keys.ElementAt(i)] = hashesToSearch[hashesToSearch.Keys.ElementAt(i)] + " - Found";
+                        //stringFound = true;
+                    }
                 }
             }
         }
@@ -106,9 +118,8 @@ namespace CheckPasswordHash
             t.Join();
 
             while ((!doneReading) && (!stringFound))
-            {                
-                lineRead = lineRead + linesAtATime;
-                label2.Text = lineRead.ToString();
+            {
+                label2.Text = lineRead.ToString("N0");
                 Application.DoEvents();
                 threadSwitch = !threadSwitch;
                 Thread t1 = new Thread(readChunk);
@@ -124,6 +135,12 @@ namespace CheckPasswordHash
             lineRead = 0;
             hashesFromFile1.Clear();
             hashesFromFile2.Clear();
+            passwordAndHints_LB.Items.Clear();
+            foreach (KeyValuePair<string, string> kvp in hashesToSearch)
+            {
+                //passwordAndHints_RTB.Text = passwordAndHints_RTB.Text + kvp.Key + " - " + kvp.Value + "\n";
+                passwordAndHints_LB.Items.Add(kvp.Key + " - " + kvp.Value + "\n");
+            }
             if (stringFound)
             {
                 MessageBox.Show("Password found - change it where ever you used it and never use it again");
@@ -147,16 +164,6 @@ namespace CheckPasswordHash
 
         private void checkHash_Btn_Click(object sender, EventArgs e)
         {
-            passwd = password_TB.Text;
-            passwordArray = Encoding.UTF8.GetBytes(passwd);
-            hashArray = hashFunction.ComputeHash(passwordArray);
-
-            StringBuilder stringBuilder = new StringBuilder();
-            foreach (byte b in hashArray)
-            {
-                stringBuilder.AppendFormat("{0:X2}", b);
-            }
-            hashToSearch = stringBuilder.ToString();
             checkFreeMemory();
             masterSpawn();
         }
@@ -171,7 +178,49 @@ namespace CheckPasswordHash
 
         private void Form1_Load(object sender, EventArgs e)
         {
+            //string url = @"https://haveibeenpwned.com/api/v2/pwnedpassword/ce0b2b771f7d468c0141918daea704e0e5ad45db";
+            //HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
             
+            //ServicePointManager.Expect100Continue = true;
+            //ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+            
+            //HttpWebResponse response = (HttpWebResponse)request.GetResponse();            
+        }
+
+        private void addHash_Btn_Click(object sender, EventArgs e)
+        {
+            if (password_TB.Text != "")
+            {
+                if (passwordRetype_TB.Text == password_TB.Text)
+                {
+                    passwd = password_TB.Text;
+                    passwordArray = Encoding.UTF8.GetBytes(passwd);
+                    hashArray = hashFunction.ComputeHash(passwordArray);
+
+                    StringBuilder stringBuilder = new StringBuilder();
+                    foreach (byte b in hashArray)
+                    {
+                        stringBuilder.AppendFormat("{0:X2}", b);
+                    }
+                    hashesToSearch.Add(stringBuilder.ToString(), hint_TB.Text);
+                    password_TB.Text = "";
+                    passwordRetype_TB.Text = "";
+                    hint_TB.Text = "";
+                }
+                else
+                {
+                    MessageBox.Show("Passwords do not match");
+                }
+            }
+            else
+            {
+                MessageBox.Show("Please enter password");
+            }
+            passwordAndHints_LB.Items.Clear();
+            foreach (KeyValuePair<string,string> kvp in hashesToSearch)
+            {
+                passwordAndHints_LB.Items.Add(kvp.Key + " - " + kvp.Value + "\n");
+            }
         }
     }
 }
