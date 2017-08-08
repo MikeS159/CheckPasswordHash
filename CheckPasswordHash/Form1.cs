@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -19,6 +20,7 @@ namespace CheckPasswordHash
         List<string> hashesFromFile1 = new List<string>();
         List<string> hashesFromFile2 = new List<string>();
         Dictionary<string,string> hashesToSearch = new Dictionary<string, string>();
+        List<byte[]> bytesToFind = new List<byte[]>();
         StreamReader sr;
         SHA1 hashFunction = new SHA1Managed();
         string passwd;
@@ -165,7 +167,16 @@ namespace CheckPasswordHash
         private void checkHash_Btn_Click(object sender, EventArgs e)
         {
             checkFreeMemory();
-            masterSpawn();
+            //masterSpawn();
+            bool found = false;
+            foreach(string s in hashesToSearch.Keys)
+            {
+                found = Check(s, filePath);
+            }
+            if(found)
+            {
+                MessageBox.Show("Found");
+            }
         }
 
         private void checkFreeMemory()
@@ -196,6 +207,7 @@ namespace CheckPasswordHash
                     passwd = password_TB.Text;
                     passwordArray = Encoding.UTF8.GetBytes(passwd);
                     hashArray = hashFunction.ComputeHash(passwordArray);
+                    bytesToFind.Add(hashArray);
 
                     StringBuilder stringBuilder = new StringBuilder();
                     foreach (byte b in hashArray)
@@ -221,6 +233,59 @@ namespace CheckPasswordHash
             {
                 passwordAndHints_LB.Items.Add(kvp.Key + " - " + kvp.Value + "\n");
             }
+        }
+
+        static bool Check(string asHex, string filename)
+        {
+            //string ByteArrayToString(byte[] ba)
+            //{
+            //    string hex = BitConverter.ToString(ba);
+            //    return hex.Replace("-", "");
+            //}
+
+            //var bytes = System.Text.Encoding.UTF8.GetBytes(password);
+            //var sha = System.Security.Cryptography.SHA1.Create();
+            //var passwordBytes = sha.ComputeHash(bytes);
+            //var asHex = ByteArrayToString(passwordBytes);
+
+            const int LINELENGTH = 40;
+
+            var buffer = new byte[LINELENGTH];
+            using (var sr = File.OpenRead(filename))
+            {
+                //Number of lines
+                var high = (sr.Length / (LINELENGTH + 2)) - 1;
+                var low = 0L;
+
+                while (low <= high)
+                {
+                    var middle = (low + high + 1) / 2;
+                    sr.Seek((LINELENGTH + 2) * ((long)middle), SeekOrigin.Begin);
+                    sr.Read(buffer, 0, LINELENGTH);
+                    var readLine = Encoding.ASCII.GetString(buffer);
+
+                    switch (readLine.CompareTo(asHex))
+                    {
+                        case 0:
+                            return true;
+
+                        case 1:
+                            high = middle - 1;
+                            break;
+
+                        case -1:
+                            low = middle + 1;
+                            break;
+
+                        default:
+                            break;
+                    }
+                }
+
+            }
+
+            return false;
+
         }
     }
 }
