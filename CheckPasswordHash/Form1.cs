@@ -8,6 +8,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
@@ -17,140 +18,15 @@ namespace CheckPasswordHash
 {
     public partial class Form1 : Form
     {
-        List<string> hashesFromFile1 = new List<string>();
-        List<string> hashesFromFile2 = new List<string>();
         Dictionary<string,string> hashesToSearch = new Dictionary<string, string>();
-        List<byte[]> bytesToFind = new List<byte[]>();
-        StreamReader sr;
+        List<string> filePaths = new List<string>();       
         SHA1 hashFunction = new SHA1Managed();
-        string passwd;
-        byte[] passwordArray;
-        byte[] hashArray;
-        //string hashToSearch;
-        string filePath;
-        bool threadSwitch = false;
-        bool doneReading = false;
-        bool stringFound = false;
-        ulong lineRead = 0;
-        ulong linesAtATime = 1000000;
+        bool searchWeb = false;
+        int TimeoutAPI = 1500;
 
         public Form1()
         {
             InitializeComponent();
-        }
-
-        private void readChunk()
-        {
-            if (!doneReading)
-            {
-                if (threadSwitch)
-                {
-                    hashesFromFile1.Clear();
-                    for (ulong i = 0; i < linesAtATime; i++)
-                    {
-                        if (sr.EndOfStream)
-                        {
-                            doneReading = true;
-                            break;
-                        }
-                        else
-                        {
-                            string s = sr.ReadLine();
-                            hashesFromFile1.Add(s);
-                            lineRead++;
-                        }
-                    }
-                }
-                else
-                {
-                    hashesFromFile2.Clear();
-                    for (ulong i = 0; i < linesAtATime; i++)
-                    {
-                        if (sr.EndOfStream)
-                        {
-                            doneReading = true;
-                            break;
-                        }
-                        else
-                        {
-                            string s = sr.ReadLine();
-                            hashesFromFile2.Add(s);
-                            lineRead++;
-                        }
-                    }
-                }
-            }
-        }
-
-        private void searchChunk()
-        {
-            if (!threadSwitch)
-            {
-                for (int i = 0; i < hashesToSearch.Keys.Count; i++)
-                {
-                    if (hashesFromFile1.Contains(hashesToSearch.Keys.ElementAt(i)))
-                    {
-                        hashesToSearch[hashesToSearch.Keys.ElementAt(i)] = hashesToSearch[hashesToSearch.Keys.ElementAt(i)] + " - Found";
-                        //stringFound = true;
-                    }
-                }
-            }
-            else
-            {
-                for (int i = 0; i < hashesToSearch.Keys.Count; i++)
-                {
-                    if (hashesFromFile2.Contains(hashesToSearch.Keys.ElementAt(i)))
-                    {
-                        hashesToSearch[hashesToSearch.Keys.ElementAt(i)] = hashesToSearch[hashesToSearch.Keys.ElementAt(i)] + " - Found";
-                        //stringFound = true;
-                    }
-                }
-            }
-        }
-
-        private void masterSpawn()
-        {
-            doneReading = false;
-            stringFound = false;
-            sr = new StreamReader(filePath);
-            label2.Text = lineRead.ToString();
-
-            Thread t = new Thread(readChunk);
-            t.Start();
-            t.Join();
-
-            while ((!doneReading) && (!stringFound))
-            {
-                label2.Text = lineRead.ToString("N0");
-                Application.DoEvents();
-                threadSwitch = !threadSwitch;
-                Thread t1 = new Thread(readChunk);
-                Thread t2 = new Thread(searchChunk);
-                t1.Start();
-                t2.Start();
-                t1.Join();
-                t2.Join();
-            }
-            threadSwitch = !threadSwitch;
-            t = new Thread(searchChunk);
-            sr.Close();
-            lineRead = 0;
-            hashesFromFile1.Clear();
-            hashesFromFile2.Clear();
-            passwordAndHints_LB.Items.Clear();
-            foreach (KeyValuePair<string, string> kvp in hashesToSearch)
-            {
-                //passwordAndHints_RTB.Text = passwordAndHints_RTB.Text + kvp.Key + " - " + kvp.Value + "\n";
-                passwordAndHints_LB.Items.Add(kvp.Key + " - " + kvp.Value + "\n");
-            }
-            if (stringFound)
-            {
-                MessageBox.Show("Password found - change it where ever you used it and never use it again");
-            }
-            else
-            {
-                MessageBox.Show("Password not found- you are ok");
-            }
         }
 
         private void openFile_Btn_Click(object sender, EventArgs e)
@@ -159,32 +35,60 @@ namespace CheckPasswordHash
             dr = openFileDialog1.ShowDialog();
             if(dr == DialogResult.OK)
             {
-                filePath = openFileDialog1.FileName;
-                sr = new StreamReader(filePath);
+                filePaths.Add(openFileDialog1.FileName);                
             }
         }
 
         private void checkHash_Btn_Click(object sender, EventArgs e)
         {
-            checkFreeMemory();
-            //masterSpawn();
-            bool found = false;
-            foreach(string s in hashesToSearch.Keys)
-            {
-                found = Check(s, filePath);
-            }
-            if(found)
-            {
-                MessageBox.Show("Found");
-            }
-        }
+            List<string> foundHashes = new List<string>();
 
-        private void checkFreeMemory()
-        {
-            ComputerInfo CI = new ComputerInfo();
-            ulong mem = ulong.Parse(CI.AvailablePhysicalMemory.ToString());
-            linesAtATime = mem / (40 * 4 * 2 * 2);
-            //40 characters per hash * 4 bytes per char (worst case for UTF8 * 2 arrays at once * 2 so only 50% memory is used
+            if (searchWeb)
+            {
+                MessageBox.Show("Due to API rate limits (1.5s) checking a large number of hashes may take a while.");
+                foreach (string hash in hashesToSearch.Keys)
+                {
+                    if (searchWebAPI(hash))
+                    {
+                        foundHashes.Add(hash);
+                    }
+                    Thread.Sleep(TimeoutAPI);
+                }
+            }
+            else
+            {                
+                if (filePaths.Count > 0)
+                {
+                    foreach (string path in filePaths)
+                    {
+                        foreach (string hash in hashesToSearch.Keys)
+                        {
+                            try
+                            {
+                                if (Check(hash, path))
+                                {
+                                    foundHashes.Add(hash);
+                                }
+                            }
+                            catch(Exception ex)
+                            {
+                                MessageBox.Show("Error reading file, does it contain non SHA1 hash values? \n" + ex.Message);
+                                return;
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("Please select some files");
+                }
+            }
+
+            foreach(string s in foundHashes)
+            {
+                hashesToSearch[s] = hashesToSearch[s] + " - Found!";
+            }
+            updatePasswordAndHint();
         }
 
         private bool searchWebAPI(string hashToFind)
@@ -199,12 +103,18 @@ namespace CheckPasswordHash
             {
                 try
                 {
-                   webClient.Headers.Add("user-agent", "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36");
+                    webClient.Headers.Add("user-agent", ".NET 4.5.2");
+                    var response = webClient.DownloadString(searchString);
                     hashFound = true;
                 }
                 catch(Exception ex)
                 {
                     hashFound = false;
+                    if(ex.Message.Contains("429"))  //This isn't the best way to do it but I couldn't get HttpWebResponse working (403 errors)
+                    {
+                        Thread.Sleep(TimeoutAPI); //Wait for rate limit
+                        hashFound = searchWebAPI(hashToFind);
+                    }
                 }
             }
 
@@ -213,7 +123,6 @@ namespace CheckPasswordHash
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            
         }
 
         private void addHash_Btn_Click(object sender, EventArgs e)
@@ -222,10 +131,9 @@ namespace CheckPasswordHash
             {
                 if (passwordRetype_TB.Text == password_TB.Text)
                 {
-                    passwd = password_TB.Text;
-                    passwordArray = Encoding.UTF8.GetBytes(passwd);
-                    hashArray = hashFunction.ComputeHash(passwordArray);
-                    bytesToFind.Add(hashArray);
+                    string passwd = password_TB.Text;
+                    byte[] passwordArray = Encoding.UTF8.GetBytes(passwd);
+                    byte[] hashArray = hashFunction.ComputeHash(passwordArray);
 
                     StringBuilder stringBuilder = new StringBuilder();
                     foreach (byte b in hashArray)
@@ -246,16 +154,27 @@ namespace CheckPasswordHash
             {
                 MessageBox.Show("Please enter password");
             }
+            updatePasswordAndHint();
+        }
+
+        private void updatePasswordAndHint()
+        {
             passwordAndHints_LB.Items.Clear();
-            foreach (KeyValuePair<string,string> kvp in hashesToSearch)
+            foreach (KeyValuePair<string, string> kvp in hashesToSearch)
             {
                 passwordAndHints_LB.Items.Add(kvp.Key + " - " + kvp.Value + "\n");
             }
         }
 
+        /// <summary>
+        /// From https://github.com/DavidBetteridge/CheckPwnedPasswords
+        /// </summary>
+        /// <param name="asHex"></param>
+        /// <param name="filename"></param>
+        /// <returns></returns>
         static bool Check(string asHex, string filename)
         {
-            const int LINELENGTH = 40;
+            const int LINELENGTH = 40;  //SHA1 hash length
 
             var buffer = new byte[LINELENGTH];
             using (var sr = File.OpenRead(filename))
@@ -293,5 +212,40 @@ namespace CheckPasswordHash
             return false;
         }
 
+        private void searchWeb_CB_CheckedChanged(object sender, EventArgs e)
+        {
+            searchWeb = searchWeb_CB.Checked;
+        }
+
+        private void bugReportToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            System.Diagnostics.Process.Start("https://github.com/MikeS159/CheckPasswordHash/issues");
+        }
+
+        private void readMeToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            System.Diagnostics.Process.Start("https://github.com/MikeS159/CheckPasswordHash/blob/master/README.md");
+        }
+
+        private void aboutToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            Assembly assem = Assembly.GetEntryAssembly();
+            string programName = FileVersionInfo.GetVersionInfo(assem.Location).ProductName;
+            string companyName = FileVersionInfo.GetVersionInfo(assem.Location).CompanyName;
+            string copyright = FileVersionInfo.GetVersionInfo(assem.Location).LegalCopyright;            
+            string assemVer = FileVersionInfo.GetVersionInfo(assem.Location).FileVersion;
+            string infoVer = FileVersionInfo.GetVersionInfo(assem.Location).ProductVersion;
+            string s =
+            programName + " by " +
+            companyName + "\n" +
+            copyright + "\n\n" +
+            "Version: " + infoVer + " (" + assemVer + ")";
+            MessageBox.Show(s);
+        }
+
+        private void iNeedHashFilesToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            System.Diagnostics.Process.Start("https://haveibeenpwned.com/Passwords");
+        }
     }
 }

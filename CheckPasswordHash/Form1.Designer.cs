@@ -41,11 +41,19 @@
             this.passwordRetype_TB = new System.Windows.Forms.TextBox();
             this.label5 = new System.Windows.Forms.Label();
             this.passwordAndHints_LB = new System.Windows.Forms.ListBox();
+            this.searchWeb_CB = new System.Windows.Forms.CheckBox();
+            this.menuStrip1 = new System.Windows.Forms.MenuStrip();
+            this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.bugReportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.readMeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.aboutToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.iNeedHashFilesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // openFile_Btn
             // 
-            this.openFile_Btn.Location = new System.Drawing.Point(12, 12);
+            this.openFile_Btn.Location = new System.Drawing.Point(12, 27);
             this.openFile_Btn.Name = "openFile_Btn";
             this.openFile_Btn.Size = new System.Drawing.Size(75, 46);
             this.openFile_Btn.TabIndex = 7;
@@ -59,7 +67,7 @@
             // 
             // password_TB
             // 
-            this.password_TB.Location = new System.Drawing.Point(79, 74);
+            this.password_TB.Location = new System.Drawing.Point(79, 89);
             this.password_TB.Name = "password_TB";
             this.password_TB.PasswordChar = '*';
             this.password_TB.Size = new System.Drawing.Size(260, 20);
@@ -67,7 +75,7 @@
             // 
             // checkHash_Btn
             // 
-            this.checkHash_Btn.Location = new System.Drawing.Point(12, 195);
+            this.checkHash_Btn.Location = new System.Drawing.Point(12, 210);
             this.checkHash_Btn.Name = "checkHash_Btn";
             this.checkHash_Btn.Size = new System.Drawing.Size(75, 23);
             this.checkHash_Btn.TabIndex = 5;
@@ -78,7 +86,7 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(11, 235);
+            this.label1.Location = new System.Drawing.Point(11, 250);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(73, 13);
             this.label1.TabIndex = 3;
@@ -87,7 +95,7 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(90, 235);
+            this.label2.Location = new System.Drawing.Point(90, 250);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(13, 13);
             this.label2.TabIndex = 4;
@@ -95,7 +103,7 @@
             // 
             // addHash_Btn
             // 
-            this.addHash_Btn.Location = new System.Drawing.Point(12, 166);
+            this.addHash_Btn.Location = new System.Drawing.Point(12, 181);
             this.addHash_Btn.Name = "addHash_Btn";
             this.addHash_Btn.Size = new System.Drawing.Size(75, 23);
             this.addHash_Btn.TabIndex = 4;
@@ -105,7 +113,8 @@
             // 
             // hint_TB
             // 
-            this.hint_TB.Location = new System.Drawing.Point(79, 129);
+            this.hint_TB.Location = new System.Drawing.Point(79, 144);
+            this.hint_TB.MaxLength = 100;
             this.hint_TB.Name = "hint_TB";
             this.hint_TB.Size = new System.Drawing.Size(260, 20);
             this.hint_TB.TabIndex = 3;
@@ -113,7 +122,7 @@
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(12, 81);
+            this.label3.Location = new System.Drawing.Point(12, 96);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(53, 13);
             this.label3.TabIndex = 7;
@@ -122,7 +131,7 @@
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(12, 132);
+            this.label4.Location = new System.Drawing.Point(12, 147);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(26, 13);
             this.label4.TabIndex = 8;
@@ -130,7 +139,7 @@
             // 
             // passwordRetype_TB
             // 
-            this.passwordRetype_TB.Location = new System.Drawing.Point(79, 100);
+            this.passwordRetype_TB.Location = new System.Drawing.Point(79, 115);
             this.passwordRetype_TB.Name = "passwordRetype_TB";
             this.passwordRetype_TB.PasswordChar = '*';
             this.passwordRetype_TB.Size = new System.Drawing.Size(260, 20);
@@ -139,7 +148,7 @@
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(12, 103);
+            this.label5.Location = new System.Drawing.Point(12, 118);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(44, 13);
             this.label5.TabIndex = 11;
@@ -148,16 +157,79 @@
             // passwordAndHints_LB
             // 
             this.passwordAndHints_LB.FormattingEnabled = true;
-            this.passwordAndHints_LB.Location = new System.Drawing.Point(393, 12);
+            this.passwordAndHints_LB.Location = new System.Drawing.Point(393, 27);
             this.passwordAndHints_LB.Name = "passwordAndHints_LB";
             this.passwordAndHints_LB.Size = new System.Drawing.Size(985, 355);
             this.passwordAndHints_LB.TabIndex = 12;
+            // 
+            // searchWeb_CB
+            // 
+            this.searchWeb_CB.AutoSize = true;
+            this.searchWeb_CB.Location = new System.Drawing.Point(128, 43);
+            this.searchWeb_CB.Name = "searchWeb_CB";
+            this.searchWeb_CB.Size = new System.Drawing.Size(128, 17);
+            this.searchWeb_CB.TabIndex = 13;
+            this.searchWeb_CB.Text = "Use Web API Search";
+            this.searchWeb_CB.UseVisualStyleBackColor = true;
+            this.searchWeb_CB.CheckedChanged += new System.EventHandler(this.searchWeb_CB_CheckedChanged);
+            // 
+            // menuStrip1
+            // 
+            this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.aboutToolStripMenuItem,
+            this.iNeedHashFilesToolStripMenuItem});
+            this.menuStrip1.Location = new System.Drawing.Point(0, 0);
+            this.menuStrip1.Name = "menuStrip1";
+            this.menuStrip1.Size = new System.Drawing.Size(1390, 24);
+            this.menuStrip1.TabIndex = 14;
+            this.menuStrip1.Text = "menuStrip1";
+            // 
+            // aboutToolStripMenuItem
+            // 
+            this.aboutToolStripMenuItem.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.aboutToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.bugReportToolStripMenuItem,
+            this.readMeToolStripMenuItem,
+            this.aboutToolStripMenuItem1});
+            this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
+            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
+            this.aboutToolStripMenuItem.Text = "Help";
+            // 
+            // bugReportToolStripMenuItem
+            // 
+            this.bugReportToolStripMenuItem.Name = "bugReportToolStripMenuItem";
+            this.bugReportToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.bugReportToolStripMenuItem.Text = "Bug Report";
+            this.bugReportToolStripMenuItem.Click += new System.EventHandler(this.bugReportToolStripMenuItem_Click);
+            // 
+            // readMeToolStripMenuItem
+            // 
+            this.readMeToolStripMenuItem.Name = "readMeToolStripMenuItem";
+            this.readMeToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.readMeToolStripMenuItem.Text = "Read Me";
+            this.readMeToolStripMenuItem.Click += new System.EventHandler(this.readMeToolStripMenuItem_Click);
+            // 
+            // aboutToolStripMenuItem1
+            // 
+            this.aboutToolStripMenuItem1.Name = "aboutToolStripMenuItem1";
+            this.aboutToolStripMenuItem1.Size = new System.Drawing.Size(152, 22);
+            this.aboutToolStripMenuItem1.Text = "About";
+            this.aboutToolStripMenuItem1.Click += new System.EventHandler(this.aboutToolStripMenuItem1_Click);
+            // 
+            // iNeedHashFilesToolStripMenuItem
+            // 
+            this.iNeedHashFilesToolStripMenuItem.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.iNeedHashFilesToolStripMenuItem.Name = "iNeedHashFilesToolStripMenuItem";
+            this.iNeedHashFilesToolStripMenuItem.Size = new System.Drawing.Size(112, 20);
+            this.iNeedHashFilesToolStripMenuItem.Text = "I Need Hash Files!";
+            this.iNeedHashFilesToolStripMenuItem.Click += new System.EventHandler(this.iNeedHashFilesToolStripMenuItem_Click);
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1390, 380);
+            this.ClientSize = new System.Drawing.Size(1390, 409);
+            this.Controls.Add(this.searchWeb_CB);
             this.Controls.Add(this.passwordAndHints_LB);
             this.Controls.Add(this.label5);
             this.Controls.Add(this.passwordRetype_TB);
@@ -170,9 +242,13 @@
             this.Controls.Add(this.checkHash_Btn);
             this.Controls.Add(this.password_TB);
             this.Controls.Add(this.openFile_Btn);
+            this.Controls.Add(this.menuStrip1);
+            this.MainMenuStrip = this.menuStrip1;
             this.Name = "Form1";
             this.Text = "Form1";
             this.Load += new System.EventHandler(this.Form1_Load);
+            this.menuStrip1.ResumeLayout(false);
+            this.menuStrip1.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -193,6 +269,13 @@
         private System.Windows.Forms.TextBox passwordRetype_TB;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.ListBox passwordAndHints_LB;
+        private System.Windows.Forms.CheckBox searchWeb_CB;
+        private System.Windows.Forms.MenuStrip menuStrip1;
+        private System.Windows.Forms.ToolStripMenuItem aboutToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem bugReportToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem readMeToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem aboutToolStripMenuItem1;
+        private System.Windows.Forms.ToolStripMenuItem iNeedHashFilesToolStripMenuItem;
     }
 }
 
