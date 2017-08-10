@@ -187,15 +187,33 @@ namespace CheckPasswordHash
             //40 characters per hash * 4 bytes per char (worst case for UTF8 * 2 arrays at once * 2 so only 50% memory is used
         }
 
+        private bool searchWebAPI(string hashToFind)
+        {
+            bool hashFound = false;
+            string searchString = @"https://haveibeenpwned.com/api/v2/pwnedpassword/" + hashToFind.ToLower();
+
+            ServicePointManager.Expect100Continue = true;
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+
+            using (var webClient = new WebClient())
+            {
+                try
+                {
+                   webClient.Headers.Add("user-agent", "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36");
+                    hashFound = true;
+                }
+                catch(Exception ex)
+                {
+                    hashFound = false;
+                }
+            }
+
+            return hashFound;
+        }
+
         private void Form1_Load(object sender, EventArgs e)
         {
-            //string url = @"https://haveibeenpwned.com/api/v2/pwnedpassword/ce0b2b771f7d468c0141918daea704e0e5ad45db";
-            //HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
             
-            //ServicePointManager.Expect100Continue = true;
-            //ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
-            
-            //HttpWebResponse response = (HttpWebResponse)request.GetResponse();            
         }
 
         private void addHash_Btn_Click(object sender, EventArgs e)
@@ -237,17 +255,6 @@ namespace CheckPasswordHash
 
         static bool Check(string asHex, string filename)
         {
-            //string ByteArrayToString(byte[] ba)
-            //{
-            //    string hex = BitConverter.ToString(ba);
-            //    return hex.Replace("-", "");
-            //}
-
-            //var bytes = System.Text.Encoding.UTF8.GetBytes(password);
-            //var sha = System.Security.Cryptography.SHA1.Create();
-            //var passwordBytes = sha.ComputeHash(bytes);
-            //var asHex = ByteArrayToString(passwordBytes);
-
             const int LINELENGTH = 40;
 
             var buffer = new byte[LINELENGTH];
@@ -283,9 +290,8 @@ namespace CheckPasswordHash
                 }
 
             }
-
             return false;
-
         }
+
     }
 }
