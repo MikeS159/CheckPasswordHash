@@ -166,13 +166,64 @@ namespace CheckPasswordHash
             }
         }
 
+        const int HASHLENGTH = 40;
+
+        static bool Check(string asHex, string filename)
+        {
+            using (var fs = File.OpenRead(filename))
+            {
+                var low = 0L;
+                // We don't need to start at the very end
+                var high = fs.Length - (HASHLENGTH - 1); // EOF - 1 HASHLENGTH
+
+                StreamReader sr = new StreamReader(fs);
+
+                while (low <= high)
+                {
+                    var middle = (low + high + 1) / 2;
+                    fs.Seek(middle, SeekOrigin.Begin);
+
+                    // Resync with base stream after seek
+                    sr.DiscardBufferedData();
+
+                    var readLine = sr.ReadLine();
+
+                    // 1) If we are NOT at the beginning of the file, we may have only read a partial line so
+                    //    Read again to make sure we get a full line.
+                    // 2) No sense reading again if we are at the EOF
+                    if ((middle > 0) && (!sr.EndOfStream)) readLine = sr.ReadLine() ?? "";
+
+                    string[] parts = readLine.Split(':');
+                    string hash = parts[0];
+
+                    // By default string compare does a culture-sensitive comparison we may not be what we want?
+                    // Do an ordinal compare (0-9 < A-Z < a-z)
+                    int compare = String.Compare(asHex, hash, StringComparison.Ordinal);
+
+                    if (compare < 0)
+                    {
+                        high = middle - 1;
+                    }
+                    else if (compare > 0)
+                    {
+                        low = middle + 1;
+                    }
+                    else
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
         /// <summary>
         /// From https://github.com/DavidBetteridge/CheckPwnedPasswords
         /// </summary>
         /// <param name="asHex"></param>
         /// <param name="filename"></param>
         /// <returns></returns>
-        static bool Check(string asHex, string filename)
+        static bool CheckOld(string asHex, string filename)
         {
             const int LINELENGTH = 40;  //SHA1 hash length
 
@@ -189,7 +240,6 @@ namespace CheckPasswordHash
                     sr.Seek((LINELENGTH + 2) * ((long)middle), SeekOrigin.Begin);
                     sr.Read(buffer, 0, LINELENGTH);
                     var readLine = Encoding.ASCII.GetString(buffer);
-
                     switch (readLine.CompareTo(asHex))
                     {
                         case 0:
@@ -207,7 +257,6 @@ namespace CheckPasswordHash
                             break;
                     }
                 }
-
             }
             return false;
         }
@@ -246,6 +295,28 @@ namespace CheckPasswordHash
         private void iNeedHashFilesToolStripMenuItem_Click(object sender, EventArgs e)
         {
             System.Diagnostics.Process.Start("https://haveibeenpwned.com/Passwords");
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            long count = 0;
+            long found = 0;
+            using (var fs = File.OpenRead(filePaths[0]))
+            {
+                StreamReader sr = new StreamReader(fs);
+                while(!sr.EndOfStream)
+                {
+                    count++;
+                    string s = sr.ReadLine();
+                    string[] ss = s.Split(':');
+                    bool b = Check(ss[0], filePaths[0]);
+                    if(b)
+                    {
+                        found++;
+                    }
+                }
+            }
+            MessageBox.Show("Found " + found.ToString() + " out of " + count.ToString());
         }
     }
 }
