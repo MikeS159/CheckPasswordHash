@@ -18,11 +18,19 @@ namespace CheckPasswordHash
 {
     public partial class Form1 : Form
     {
-        Dictionary<string,string> hashesToSearch = new Dictionary<string, string>();
+        Dictionary<string, hashCount> userHashes = new Dictionary<string, hashCount>();
         List<string> filePaths = new List<string>();       
         SHA1 hashFunction = new SHA1Managed();
         bool searchWeb = false;
         int TimeoutAPI = 1500;
+        static int currentCount = 0;
+
+        struct hashCount
+        {
+            public bool hashFound;
+            public int count;
+            public string hint;
+        }
 
         public Form1()
         {
@@ -35,90 +43,93 @@ namespace CheckPasswordHash
             dr = openFileDialog1.ShowDialog();
             if(dr == DialogResult.OK)
             {
-                filePaths.Add(openFileDialog1.FileName);                
+                if (!filePaths.Contains(openFileDialog1.FileName))
+                {
+                    filePaths.Add(openFileDialog1.FileName);
+                }
             }
         }
 
         private void checkHash_Btn_Click(object sender, EventArgs e)
         {
-            List<string> foundHashes = new List<string>();
-
-            if (searchWeb)
+            if(searchWeb)
             {
                 MessageBox.Show("Due to API rate limits (1.5s) checking a large number of hashes may take a while.");
-                foreach (string hash in hashesToSearch.Keys)
-                {
-                    if (searchWebAPI(hash))
-                    {
-                        foundHashes.Add(hash);
-                    }
+            }
+
+            Tuple<bool, int> returnTup = new Tuple<bool, int>(false, 0);
+            Dictionary<string, hashCount> updatedHashes = new Dictionary<string, hashCount>();
+
+            foreach (string hash in userHashes.Keys)
+            {                
+                if(searchWeb)
+                {                    
+                    returnTup = searchWebAPI(hash);
                     Thread.Sleep(TimeoutAPI);
                 }
-            }
-            else
-            {                
-                if (filePaths.Count > 0)
+                else
                 {
-                    foreach (string path in filePaths)
+                    if (filePaths.Count > 0)
                     {
-                        foreach (string hash in hashesToSearch.Keys)
+                        foreach (string path in filePaths)
                         {
                             try
                             {
-                                if (Check(hash, path))
-                                {
-                                    foundHashes.Add(hash);
-                                }
+                                returnTup = Check(hash, path);
                             }
-                            catch(Exception ex)
+                            catch (Exception ex)
                             {
                                 MessageBox.Show("Error reading file, does it contain non SHA1 hash values? \n" + ex.Message);
                                 return;
                             }
                         }
                     }
+                    else
+                    {
+                        MessageBox.Show("Please select some files");
+                    }
                 }
-                else
-                {
-                    MessageBox.Show("Please select some files");
-                }
-            }
 
-            foreach(string s in foundHashes)
-            {
-                hashesToSearch[s] = hashesToSearch[s] + " - Found!";
+                hashCount hc = userHashes[hash];
+                hc.hashFound = returnTup.Item1;
+                hc.count = returnTup.Item2;
+                updatedHashes.Add(hash, hc);
             }
+            userHashes.Clear();
+            userHashes = updatedHashes;
             updatePasswordAndHint();
         }
 
-        private bool searchWebAPI(string hashToFind)
+        private Tuple<bool, int> searchWebAPI(string hashToFind)
         {
             bool hashFound = false;
-            string searchString = @"https://haveibeenpwned.com/api/v2/pwnedpassword/" + hashToFind.ToLower();
-
-            ServicePointManager.Expect100Continue = true;
-            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
-
+            string searchString = @"https://api.pwnedpasswords.com/pwnedpassword/" + hashToFind.ToLower();
+            int hashCount = 0;
+            
             using (var webClient = new WebClient())
             {
                 try
                 {
-                    webClient.Headers.Add("user-agent", ".NET 4.5.2");
-                    var response = webClient.DownloadString(searchString);
+                    WebRequest request = WebRequest.Create(searchString);
+                    WebResponse response = request.GetResponse();
+
+                    Stream dataStream = response.GetResponseStream();
+
+                    StreamReader reader = new StreamReader(dataStream);
+
+                    string s  = reader.ReadToEnd();
+
+                    Int32.TryParse(s, out hashCount);
+                                        
                     hashFound = true;
                 }
                 catch(Exception ex)
                 {
-                    hashFound = false;
-                    if(ex.Message.Contains("429"))  //This isn't the best way to do it but I couldn't get HttpWebResponse working (403 errors)
-                    {
-                        Thread.Sleep(TimeoutAPI); //Wait for rate limit
-                        hashFound = searchWebAPI(hashToFind);
-                    }
+                    hashFound = false;                    
                 }
             }
 
-            return hashFound;
+            return Tuple.Create(hashFound, hashCount);
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -140,7 +151,14 @@ namespace CheckPasswordHash
                     {
                         stringBuilder.AppendFormat("{0:X2}", b);
                     }
-                    hashesToSearch.Add(stringBuilder.ToString(), hint_TB.Text);
+                    if (!userHashes.ContainsKey(stringBuilder.ToString()))
+                    {
+                        hashCount hc = new hashCount();
+                        hc.count = 0;
+                        hc.hashFound = false;
+                        hc.hint = hint_TB.Text;
+                        userHashes.Add(stringBuilder.ToString(), hc);
+                    }
                     password_TB.Text = "";
                     passwordRetype_TB.Text = "";
                     hint_TB.Text = "";
@@ -160,16 +178,29 @@ namespace CheckPasswordHash
         private void updatePasswordAndHint()
         {
             passwordAndHints_LB.Items.Clear();
-            foreach (KeyValuePair<string, string> kvp in hashesToSearch)
+            foreach (KeyValuePair<string, hashCount> kvp in userHashes)
             {
-                passwordAndHints_LB.Items.Add(kvp.Key + " - " + kvp.Value + "\n");
+                hashCount hc = kvp.Value;
+                string s = "";
+                if(hc.hashFound)
+                {
+                    s = "found " + hc.count.ToString() + " times";
+                }
+                else
+                {
+                    s = "not found";
+                }
+                passwordAndHints_LB.Items.Add(kvp.Key + " - " + hc.hint + " - " + s);
             }
         }
 
         const int HASHLENGTH = 40;
 
-        static bool Check(string asHex, string filename)
+        static Tuple<bool, int> Check(string asHex, string filename)
         {
+            bool hashFound = false;
+            int hasCount = 0;
+
             using (var fs = File.OpenRead(filename))
             {
                 var low = 0L;
@@ -210,55 +241,20 @@ namespace CheckPasswordHash
                     }
                     else
                     {
-                        return true;
+                        if(parts.Length > 1)
+                        {
+                            if(Int32.TryParse(parts[1], out hasCount))
+                            {
+
+                            }
+                        }
+                        hashFound = true;
+                        break;
                     }
                 }
             }
-            return false;
-        }
-
-        /// <summary>
-        /// From https://github.com/DavidBetteridge/CheckPwnedPasswords
-        /// </summary>
-        /// <param name="asHex"></param>
-        /// <param name="filename"></param>
-        /// <returns></returns>
-        static bool CheckOld(string asHex, string filename)
-        {
-            const int LINELENGTH = 40;  //SHA1 hash length
-
-            var buffer = new byte[LINELENGTH];
-            using (var sr = File.OpenRead(filename))
-            {
-                //Number of lines
-                var high = (sr.Length / (LINELENGTH + 2)) - 1;
-                var low = 0L;
-
-                while (low <= high)
-                {
-                    var middle = (low + high + 1) / 2;
-                    sr.Seek((LINELENGTH + 2) * ((long)middle), SeekOrigin.Begin);
-                    sr.Read(buffer, 0, LINELENGTH);
-                    var readLine = Encoding.ASCII.GetString(buffer);
-                    switch (readLine.CompareTo(asHex))
-                    {
-                        case 0:
-                            return true;
-
-                        case 1:
-                            high = middle - 1;
-                            break;
-
-                        case -1:
-                            low = middle + 1;
-                            break;
-
-                        default:
-                            break;
-                    }
-                }
-            }
-            return false;
+            
+            return Tuple.Create(hashFound, hasCount);
         }
 
         private void searchWeb_CB_CheckedChanged(object sender, EventArgs e)
@@ -309,7 +305,7 @@ namespace CheckPasswordHash
                     count++;
                     string s = sr.ReadLine();
                     string[] ss = s.Split(':');
-                    bool b = Check(ss[0], filePaths[0]);
+                    bool b = true; // Check(ss[0], filePaths[0]);
                     if(b)
                     {
                         found++;
