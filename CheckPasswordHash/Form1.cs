@@ -22,9 +22,12 @@ namespace CheckPasswordHash
         List<string> filePaths = new List<string>();       
         SHA1 hashFunction = new SHA1Managed();
         bool searchWeb = false;
-        int TimeoutAPI = 1500;
-        static int currentCount = 0;
+        int TimeoutAPI = 1500;  //API calls are limited to 1.5s
+        const int HASHLENGTH = 40;  //SHA1 hash length
 
+        /// <summary>
+        /// Information on each hash the user wants to check
+        /// </summary>
         struct hashCount
         {
             public bool hashFound;
@@ -37,6 +40,11 @@ namespace CheckPasswordHash
             InitializeComponent();
         }
 
+        /// <summary>
+        /// Load files to check
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void openFile_Btn_Click(object sender, EventArgs e)
         {
             DialogResult dr = new DialogResult();
@@ -50,6 +58,11 @@ namespace CheckPasswordHash
             }
         }
 
+        /// <summary>
+        /// Will check the users list of hashes againsts a file or using the Web API
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void checkHash_Btn_Click(object sender, EventArgs e)
         {
             if(searchWeb)
@@ -100,6 +113,11 @@ namespace CheckPasswordHash
             updatePasswordAndHint();
         }
 
+        /// <summary>
+        /// Checks if hash exists in data breaches and the number of times it was used by checking the Web API
+        /// </summary>
+        /// <param name="hashToFind"></param>
+        /// <returns></returns>
         private Tuple<bool, int> searchWebAPI(string hashToFind)
         {
             bool hashFound = false;
@@ -136,6 +154,11 @@ namespace CheckPasswordHash
         {
         }
 
+        /// <summary>
+        /// Adds a hash of the currently entered password and a hint to the list of passwords to check
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void addHash_Btn_Click(object sender, EventArgs e)
         {
             if (password_TB.Text != "")
@@ -175,6 +198,9 @@ namespace CheckPasswordHash
             updatePasswordAndHint();
         }
 
+        /// <summary>
+        /// Updates the display with users hash list and if they have been found
+        /// </summary>
         private void updatePasswordAndHint()
         {
             passwordAndHints_LB.Items.Clear();
@@ -192,10 +218,9 @@ namespace CheckPasswordHash
                 }
                 passwordAndHints_LB.Items.Add(kvp.Key + " - " + hc.hint + " - " + s);
             }
-        }
+        }        
 
-        const int HASHLENGTH = 40;
-
+        /// Checks if hash exists in data breaches and the number of times it was used by check a file of hashes
         static Tuple<bool, int> Check(string asHex, string filename)
         {
             bool hashFound = false;
@@ -257,21 +282,39 @@ namespace CheckPasswordHash
             return Tuple.Create(hashFound, hasCount);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void searchWeb_CB_CheckedChanged(object sender, EventArgs e)
         {
             searchWeb = searchWeb_CB.Checked;
         }
-
+        /// <summary>
+        /// Loads issues page on GitHub
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void bugReportToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            System.Diagnostics.Process.Start("https://github.com/MikeS159/CheckPasswordHash/issues");
+            Process.Start("https://github.com/MikeS159/CheckPasswordHash/issues");
         }
-
+        /// <summary>
+        /// Loads readme page on GitHub
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void readMeToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            System.Diagnostics.Process.Start("https://github.com/MikeS159/CheckPasswordHash/blob/master/README.md");
+            Process.Start("https://github.com/MikeS159/CheckPasswordHash/blob/master/README.md");
         }
 
+        /// <summary>
+        /// Displays program information
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void aboutToolStripMenuItem1_Click(object sender, EventArgs e)
         {
             Assembly assem = Assembly.GetEntryAssembly();
@@ -288,31 +331,14 @@ namespace CheckPasswordHash
             MessageBox.Show(s);
         }
 
+        /// <summary>
+        /// Loads the HaveIBeenPwned passwords webpage
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void iNeedHashFilesToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            System.Diagnostics.Process.Start("https://haveibeenpwned.com/Passwords");
-        }
-
-        private void button1_Click(object sender, EventArgs e)
-        {
-            long count = 0;
-            long found = 0;
-            using (var fs = File.OpenRead(filePaths[0]))
-            {
-                StreamReader sr = new StreamReader(fs);
-                while(!sr.EndOfStream)
-                {
-                    count++;
-                    string s = sr.ReadLine();
-                    string[] ss = s.Split(':');
-                    bool b = true; // Check(ss[0], filePaths[0]);
-                    if(b)
-                    {
-                        found++;
-                    }
-                }
-            }
-            MessageBox.Show("Found " + found.ToString() + " out of " + count.ToString());
+            Process.Start("https://haveibeenpwned.com/Passwords");
         }
     }
 }
