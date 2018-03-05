@@ -48,7 +48,6 @@
             this.readMeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.iNeedHashFilesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.button1 = new System.Windows.Forms.Button();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -78,9 +77,9 @@
             // 
             this.checkHash_Btn.Location = new System.Drawing.Point(12, 210);
             this.checkHash_Btn.Name = "checkHash_Btn";
-            this.checkHash_Btn.Size = new System.Drawing.Size(75, 23);
+            this.checkHash_Btn.Size = new System.Drawing.Size(91, 23);
             this.checkHash_Btn.TabIndex = 5;
-            this.checkHash_Btn.Text = "Check Hash";
+            this.checkHash_Btn.Text = "Check Hashs";
             this.checkHash_Btn.UseVisualStyleBackColor = true;
             this.checkHash_Btn.Click += new System.EventHandler(this.checkHash_Btn_Click);
             // 
@@ -106,7 +105,7 @@
             // 
             this.addHash_Btn.Location = new System.Drawing.Point(12, 181);
             this.addHash_Btn.Name = "addHash_Btn";
-            this.addHash_Btn.Size = new System.Drawing.Size(75, 23);
+            this.addHash_Btn.Size = new System.Drawing.Size(91, 23);
             this.addHash_Btn.TabIndex = 4;
             this.addHash_Btn.Text = "Add Hash";
             this.addHash_Btn.UseVisualStyleBackColor = true;
@@ -225,22 +224,11 @@
             this.iNeedHashFilesToolStripMenuItem.Text = "I Need Hash Files!";
             this.iNeedHashFilesToolStripMenuItem.Click += new System.EventHandler(this.iNeedHashFilesToolStripMenuItem_Click);
             // 
-            // button1
-            // 
-            this.button1.Location = new System.Drawing.Point(213, 181);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(75, 23);
-            this.button1.TabIndex = 15;
-            this.button1.Text = "button1";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click);
-            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1390, 409);
-            this.Controls.Add(this.button1);
             this.Controls.Add(this.searchWeb_CB);
             this.Controls.Add(this.passwordAndHints_LB);
             this.Controls.Add(this.label5);
@@ -288,7 +276,6 @@
         private System.Windows.Forms.ToolStripMenuItem readMeToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem aboutToolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem iNeedHashFilesToolStripMenuItem;
-        private System.Windows.Forms.Button button1;
     }
 }
 
