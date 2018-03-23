@@ -48,6 +48,7 @@
             this.readMeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.iNeedHashFilesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.warning_TB = new System.Windows.Forms.TextBox();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -224,11 +225,27 @@
             this.iNeedHashFilesToolStripMenuItem.Text = "I Need Hash Files!";
             this.iNeedHashFilesToolStripMenuItem.Click += new System.EventHandler(this.iNeedHashFilesToolStripMenuItem_Click);
             // 
+            // warning_TB
+            // 
+            this.warning_TB.BackColor = System.Drawing.SystemColors.Control;
+            this.warning_TB.Font = new System.Drawing.Font("Microsoft Sans Serif", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.warning_TB.ForeColor = System.Drawing.Color.Red;
+            this.warning_TB.Location = new System.Drawing.Point(119, 170);
+            this.warning_TB.Multiline = true;
+            this.warning_TB.Name = "warning_TB";
+            this.warning_TB.ReadOnly = true;
+            this.warning_TB.Size = new System.Drawing.Size(256, 195);
+            this.warning_TB.TabIndex = 16;
+            this.warning_TB.Text = "Warning: Do not use the web API with passwords you are activly using on websites/" +
+    "services";
+            this.warning_TB.Visible = false;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1390, 409);
+            this.Controls.Add(this.warning_TB);
             this.Controls.Add(this.searchWeb_CB);
             this.Controls.Add(this.passwordAndHints_LB);
             this.Controls.Add(this.label5);
@@ -276,6 +293,7 @@
         private System.Windows.Forms.ToolStripMenuItem readMeToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem aboutToolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem iNeedHashFilesToolStripMenuItem;
+        private System.Windows.Forms.TextBox warning_TB;
     }
 }
 

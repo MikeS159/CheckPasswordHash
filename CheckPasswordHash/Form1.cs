@@ -152,6 +152,7 @@ namespace CheckPasswordHash
 
         private void Form1_Load(object sender, EventArgs e)
         {
+            displayWarning();
         }
 
         /// <summary>
@@ -282,6 +283,18 @@ namespace CheckPasswordHash
             return Tuple.Create(hashFound, hasCount);
         }
 
+        private void displayWarning()
+        {
+            if(searchWeb)
+            {
+                warning_TB.Visible = true;
+            }
+            else
+            {
+                warning_TB.Visible = false;
+            }            
+        }
+
         /// <summary>
         /// 
         /// </summary>
@@ -290,6 +303,7 @@ namespace CheckPasswordHash
         private void searchWeb_CB_CheckedChanged(object sender, EventArgs e)
         {
             searchWeb = searchWeb_CB.Checked;
+            displayWarning();
         }
         /// <summary>
         /// Loads issues page on GitHub
