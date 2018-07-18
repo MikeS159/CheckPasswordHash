@@ -54,9 +54,33 @@ namespace CheckPasswordHash
                 if (!filePaths.Contains(openFileDialog1.FileName))
                 {
                     filePaths.Add(openFileDialog1.FileName);
+                    //checkAllPasswords();
                 }
             }
         }
+
+        // private void checkAllPasswords()
+        // {
+        //     ulong totalCount = 0;
+        //     ulong found = 0;
+        //     foreach(string path in filePaths)
+        //     {
+        //         StreamReader sr = new StreamReader(path);
+        //         while(!sr.EndOfStream)
+        //         {
+        //             string line = sr.ReadLine();
+        //             string[] splitLine = line.Split(':');
+        //             Tuple<bool, int> returnTup = new Tuple<bool, int>(false, 0);
+        //             returnTup = Check(splitLine[0], path);
+        //             totalCount++;
+        //             if(returnTup.Item1 == true && returnTup.Item2 == Convert.ToInt32(splitLine[1]))
+        //             {
+        //                 found++;
+        //             }
+        //         }
+        //     }
+        //     MessageBox.Show("Total lines = " + totalCount.ToString() + "\n" + "Found hashes = " + found.ToString());
+        // }
 
         /// <summary>
         /// Will check the users list of hashes againsts a file or using the Web API
