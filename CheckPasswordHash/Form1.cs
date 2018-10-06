@@ -20,8 +20,7 @@ namespace CheckPasswordHash
     {
         Dictionary<string, hashCount> userHashes = new Dictionary<string, hashCount>();
         List<string> filePaths = new List<string>();       
-        SHA1 hashFunction = new SHA1Managed();
-        bool searchWeb = false;
+        SHA1 hashFunction = new SHA1Managed();        
         int TimeoutAPI = 1500;  //API calls are limited to 1.5s
         const int HASHLENGTH = 40;  //SHA1 hash length
 
@@ -59,29 +58,6 @@ namespace CheckPasswordHash
             }
         }
 
-        // private void checkAllPasswords()
-        // {
-        //     ulong totalCount = 0;
-        //     ulong found = 0;
-        //     foreach(string path in filePaths)
-        //     {
-        //         StreamReader sr = new StreamReader(path);
-        //         while(!sr.EndOfStream)
-        //         {
-        //             string line = sr.ReadLine();
-        //             string[] splitLine = line.Split(':');
-        //             Tuple<bool, int> returnTup = new Tuple<bool, int>(false, 0);
-        //             returnTup = Check(splitLine[0], path);
-        //             totalCount++;
-        //             if(returnTup.Item1 == true && returnTup.Item2 == Convert.ToInt32(splitLine[1]))
-        //             {
-        //                 found++;
-        //             }
-        //         }
-        //     }
-        //     MessageBox.Show("Total lines = " + totalCount.ToString() + "\n" + "Found hashes = " + found.ToString());
-        // }
-
         /// <summary>
         /// Will check the users list of hashes againsts a file or using the Web API
         /// </summary>
@@ -89,42 +65,29 @@ namespace CheckPasswordHash
         /// <param name="e"></param>
         private void checkHash_Btn_Click(object sender, EventArgs e)
         {
-            if(searchWeb)
-            {
-                MessageBox.Show("Due to API rate limits (1.5s) checking a large number of hashes may take a while.");
-            }
-
             Tuple<bool, int> returnTup = new Tuple<bool, int>(false, 0);
             Dictionary<string, hashCount> updatedHashes = new Dictionary<string, hashCount>();
 
             foreach (string hash in userHashes.Keys)
-            {                
-                if(searchWeb)
-                {                    
-                    returnTup = searchWebAPI(hash);
-                    Thread.Sleep(TimeoutAPI);
+            {
+                if (filePaths.Count > 0)
+                {
+                    foreach (string path in filePaths)
+                    {
+                        try
+                        {
+                            returnTup = Check(hash, path);
+                        }
+                        catch (Exception ex)
+                        {
+                            MessageBox.Show("Error reading file, does it contain non SHA1 hash values? \n" + ex.Message);
+                            return;
+                        }
+                    }
                 }
                 else
                 {
-                    if (filePaths.Count > 0)
-                    {
-                        foreach (string path in filePaths)
-                        {
-                            try
-                            {
-                                returnTup = Check(hash, path);
-                            }
-                            catch (Exception ex)
-                            {
-                                MessageBox.Show("Error reading file, does it contain non SHA1 hash values? \n" + ex.Message);
-                                return;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        MessageBox.Show("Please select some files");
-                    }
+                    MessageBox.Show("Please select some files");
                 }
 
                 hashCount hc = userHashes[hash];
@@ -175,8 +138,7 @@ namespace CheckPasswordHash
         }
 
         private void Form1_Load(object sender, EventArgs e)
-        {
-            displayWarning();
+        {            
         }
 
         /// <summary>
@@ -307,28 +269,6 @@ namespace CheckPasswordHash
             return Tuple.Create(hashFound, hasCount);
         }
 
-        private void displayWarning()
-        {
-            if(searchWeb)
-            {
-                warning_TB.Visible = true;
-            }
-            else
-            {
-                warning_TB.Visible = false;
-            }            
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void searchWeb_CB_CheckedChanged(object sender, EventArgs e)
-        {
-            searchWeb = searchWeb_CB.Checked;
-            displayWarning();
-        }
         /// <summary>
         /// Loads issues page on GitHub
         /// </summary>
@@ -338,6 +278,7 @@ namespace CheckPasswordHash
         {
             Process.Start("https://github.com/MikeS159/CheckPasswordHash/issues");
         }
+
         /// <summary>
         /// Loads readme page on GitHub
         /// </summary>

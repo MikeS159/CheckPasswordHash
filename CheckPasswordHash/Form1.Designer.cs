@@ -41,14 +41,12 @@
             this.passwordRetype_TB = new System.Windows.Forms.TextBox();
             this.label5 = new System.Windows.Forms.Label();
             this.passwordAndHints_LB = new System.Windows.Forms.ListBox();
-            this.searchWeb_CB = new System.Windows.Forms.CheckBox();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.bugReportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.readMeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.iNeedHashFilesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.warning_TB = new System.Windows.Forms.TextBox();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -163,17 +161,6 @@
             this.passwordAndHints_LB.Size = new System.Drawing.Size(985, 355);
             this.passwordAndHints_LB.TabIndex = 12;
             // 
-            // searchWeb_CB
-            // 
-            this.searchWeb_CB.AutoSize = true;
-            this.searchWeb_CB.Location = new System.Drawing.Point(128, 43);
-            this.searchWeb_CB.Name = "searchWeb_CB";
-            this.searchWeb_CB.Size = new System.Drawing.Size(128, 17);
-            this.searchWeb_CB.TabIndex = 13;
-            this.searchWeb_CB.Text = "Use Web API Search";
-            this.searchWeb_CB.UseVisualStyleBackColor = true;
-            this.searchWeb_CB.CheckedChanged += new System.EventHandler(this.searchWeb_CB_CheckedChanged);
-            // 
             // menuStrip1
             // 
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -225,28 +212,11 @@
             this.iNeedHashFilesToolStripMenuItem.Text = "I Need Hash Files!";
             this.iNeedHashFilesToolStripMenuItem.Click += new System.EventHandler(this.iNeedHashFilesToolStripMenuItem_Click);
             // 
-            // warning_TB
-            // 
-            this.warning_TB.BackColor = System.Drawing.SystemColors.Control;
-            this.warning_TB.Font = new System.Drawing.Font("Microsoft Sans Serif", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.warning_TB.ForeColor = System.Drawing.Color.Red;
-            this.warning_TB.Location = new System.Drawing.Point(119, 170);
-            this.warning_TB.Multiline = true;
-            this.warning_TB.Name = "warning_TB";
-            this.warning_TB.ReadOnly = true;
-            this.warning_TB.Size = new System.Drawing.Size(256, 195);
-            this.warning_TB.TabIndex = 16;
-            this.warning_TB.Text = "Warning: Do not use the web API with passwords you are activly using on websites/" +
-    "services";
-            this.warning_TB.Visible = false;
-            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1390, 409);
-            this.Controls.Add(this.warning_TB);
-            this.Controls.Add(this.searchWeb_CB);
             this.Controls.Add(this.passwordAndHints_LB);
             this.Controls.Add(this.label5);
             this.Controls.Add(this.passwordRetype_TB);
@@ -286,14 +256,12 @@
         private System.Windows.Forms.TextBox passwordRetype_TB;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.ListBox passwordAndHints_LB;
-        private System.Windows.Forms.CheckBox searchWeb_CB;
         private System.Windows.Forms.MenuStrip menuStrip1;
         private System.Windows.Forms.ToolStripMenuItem aboutToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem bugReportToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem readMeToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem aboutToolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem iNeedHashFilesToolStripMenuItem;
-        private System.Windows.Forms.TextBox warning_TB;
     }
 }
 
